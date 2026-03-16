@@ -43,8 +43,14 @@ chmod +x "$TMP_DIR/foxar"
 echo "Installing to $INSTALL_DIR..."
 if [[ -w "$INSTALL_DIR" ]]; then
     mv "$TMP_DIR/foxar" "$INSTALL_DIR/$BINARY_NAME"
+elif sudo -n mv "$TMP_DIR/foxar" "$INSTALL_DIR/$BINARY_NAME" 2>/dev/null; then
+    : # installed with cached sudo credentials
 else
-    sudo mv "$TMP_DIR/foxar" "$INSTALL_DIR/$BINARY_NAME"
+    osascript -e "do shell script \"mv '$TMP_DIR/foxar' '$INSTALL_DIR/$BINARY_NAME'\" with administrator privileges" 2>/dev/null || {
+        echo -e "${RED}Error: Could not install. Run manually:${NC}"
+        echo "  sudo mv $TMP_DIR/foxar $INSTALL_DIR/$BINARY_NAME"
+        exit 1
+    }
 fi
 
 # Verify
